@@ -46,12 +46,20 @@ func (s *TaskScheduler) Start() {
     }()
 }
 
-func main() {
-	fmt.Print("Task name: ")
-	var task string
-	fmt.Scanln(&task)
-	fmt.Printf("Task has name: %s.\n", task)
+func (s *TaskScheduler) ScheduleOnce(dur time.Duration, task Task) {
+    go func() {
+        time.Sleep(dur)
+        s.TaskQueue <- task
+    }()
+}
 
-	currentTime := time.Now()
-	fmt.Printf("Current time: %s\n", currentTime.Format("2006–01–02 15:04:05"))
+func main() {
+    taskScheduler := NewTaskScheduler(1 * time.Second)
+    taskScheduler.Start()
+
+    for {
+        task := PrintTask{Message: "Hey there"}
+        taskScheduler.ScheduleOnce(0, task) // Schedules the task to be executed immediately
+        time.Sleep(3 * time.Second) // Wait for 3 seconds before scheduling the next task
+    }
 }
